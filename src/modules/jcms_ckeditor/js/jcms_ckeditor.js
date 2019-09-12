@@ -8,6 +8,15 @@
   const PUBLISH = 2;
   const VALIDATE_AND_PUBLISH = 3;
   
+  Drupal.behaviors.customCKEditorConfig = {
+    attach: function (context, settings) {
+      if (typeof CKEDITOR !== "undefined") {
+        CKEDITOR.dtd.placeholder = {span: 1, img: 1};
+        CKEDITOR.dtd.$inline['placeholder'] = 1;
+      }
+    }
+  }
+  
   Drupal.behaviors.inlineEditor = {
     attach: function(context, settings) {
 
@@ -270,11 +279,15 @@
             // Save the main field content
             var saveBodyEditor = function(showSaveNotification){
               // Remove any hidden placeholder text
-              $(bodyEditor.editable().$).find('placeholder').remove();
+              if ($(bodyEditor.editable().$).find('placeholder').length > 0) {
+                var placeholder = $(bodyEditor.editable().$).find('placeholder').html().replace(settings.placeholder, '');
+                if ($.trim(placeholder).length === 0){
+                  $(bodyEditor.editable().$).find('placeholder').remove();
+                }
+              }
               var content = bodyEditor.getData();
               if ($.trim(content).length === 0) {
-                // if we are left with an empty string 
-                // reinstate placeholder
+                // if we are left with an empty string reinstate placeholder
                 bodyEditor.setData('<p><placeholder>' + settings.placeholder + '</placeholder></p>');
               }
               images = editable.find('img');
